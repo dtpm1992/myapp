@@ -14,9 +14,8 @@ export default {
   dev: {
     // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
     '/api/': {
-      target: 'https://localhost:5000/api',
+      target: 'http://localhost:5000',
       changeOrigin: true,
-      pathRewrite: { '^/api': '/api' },
     },
   },
   /**
@@ -26,16 +25,14 @@ export default {
   test: {
     // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
     '/api/': {
-      target: 'https://localhost:5000/api',
+      target: 'http://localhost:5000',
       changeOrigin: true,
-      pathRewrite: { '^/api': '/api' },
     },
   },
   pre: {
     '/api/': {
       target: 'your pre url',
       changeOrigin: true,
-      pathRewrite: { '^': '' },
     },
   },
 };

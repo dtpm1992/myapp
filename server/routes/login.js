@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken'); // 用于生成登录令牌（根据实际�
 // 飞书配置（从环境变量或配置文件读取）
 const FEISHU_CONFIG = {
   appId: 'cli_9f56c4e1cd3b900b',
-  appSecret: 'dsaaaaaaaaaaaa',
+  appSecret: 'aaaaa',
   redirectUri: 'http://localhost:8000/callback/feishu',
 };
 
@@ -58,7 +58,7 @@ router.post('/feishu', async (req, res) => {
     );
 
     // 设置 cookie 或返回 token（根据项目登录逻辑）
-    res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 });
+    res.cookie('token', token, { httpOnly: true, maxAge: 24 * 60 * 60 * 1000 ,sameSite: 'Lax'});
 
     // 返回与现有登录一致的格式
     res.json({
