@@ -2,8 +2,15 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const loginRouter = require('./routes/login');
 const currentUserRouter = require('./routes/currentUser');
+const cors = require('cors'); 
 
 const app = express();
+
+// 配置 CORS，允许前端域名访问
+app.use(cors({
+  origin: 'http://localhost:8000', // 前端地址
+  credentials: true, // 允许携带 cookie
+}));
 
 // 中间件
 app.use(express.json());

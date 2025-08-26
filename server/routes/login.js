@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken'); // 用于生成登录令牌（根据实际�
 // 飞书配置（从环境变量或配置文件读取）
 const FEISHU_CONFIG = {
   appId: 'cli_9f56c4e1cd3b900b',
-  appSecret: 'aaaaa',
+  appSecret: 'aaa',
   redirectUri: 'http://localhost:8000/callback/feishu',
 };
 

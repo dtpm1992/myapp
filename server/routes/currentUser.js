@@ -24,6 +24,7 @@ router.get('/', (req, res) => {
 
     res.json({ data: userInfo });
   } catch (error) {
+    console.log('Token 验证失败:', error);
     res.status(401).json({ error: '登录已过期' });
   }
 });
