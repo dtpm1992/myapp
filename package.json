@@ -46,6 +46,7 @@
     "classnames": "^2.5.1",
     "cors": "^2.8.5",
     "dayjs": "^1.11.13",
+    "jsonwebtoken": "^9.0.2",
     "numeral": "^2.0.6",
     "rc-util": "^5.44.4",
     "react": "^19.1.0",

@@ -14,7 +14,7 @@ export default {
   dev: {
     // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
     '/api/': {
-      target: 'http://localhost:5000',
+      target: 'http://localhost:9000',
       changeOrigin: true,
     },
   },
@@ -25,7 +25,7 @@ export default {
   test: {
     // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
     '/api/': {
-      target: 'http://localhost:5000',
+      target: 'http://localhost:9000',
       changeOrigin: true,
     },
   },

@@ -262,11 +262,6 @@ export default [
     redirect: '/dashboard/analysis',
   },
   {
-    path: '/callback/feishu',
-    component: 'callback/feishu',
-    title: '飞书登录回调',
-  },
-  {
     component: '404',
     path: '/*',
   },
