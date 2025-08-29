@@ -161,9 +161,4 @@ export default defineConfig({
   esbuildMinifyIIFE: true,
   requestRecord: {},
   exportStatic: {},
-  define: {
-    'process.env.CI': process.env.CI,
-    'process.env.FEISHU_APP_ID': JSON.stringify('cli_9f56c4e1cd3b900b'),
-    'process.env.FEISHU_REDIRECT_URI': JSON.stringify('http://localhost:8000/callback/feishu'),
-  },
 });
