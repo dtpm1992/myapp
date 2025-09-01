@@ -21,12 +21,15 @@ const loginPath = '/user/login';
 
 // 读取 cookie 工具函数
 const getCookie = (name: string): string | null => {
-  if (!document.cookie) return null;
-  const cookies = document.cookie.split(';').map(c => c.trim());
-  console.log(cookies)
-  for (const cookie of cookies) {
+  if (typeof document === 'undefined') return null;
+    const cookieString = document.cookie;
+  if (!cookieString) return null;
+  const cookies = cookieString.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    let cookie = cookies[i].trim(); 
     if (cookie.indexOf(`${name}=`) === 0) {
-      return cookie.substring(name.length + 1);
+      const cookieValue = cookie.substring(name.length + 1);
+      return decodeURIComponent(cookieValue);
     }
   }
   return null;
@@ -103,7 +106,7 @@ const setupGlobalClickHandler = () => {
       e.stopPropagation();
       // 跳转到首页
       if (window.location.pathname !== '/') {
-        history.replace('/');
+        history.replace(loginPath);
       }
     }
   };
@@ -148,7 +151,7 @@ export const layout: RunTimeLayoutConfig = ({
       const { location } = history;
       // 页面切换时检查 session
       if (isSessionEmpty() && !['/', loginPath].includes(location.pathname)) {
-        history.replace('/');
+        history.replace(loginPath);
         return;
       }
       // 原有登录检查逻辑
