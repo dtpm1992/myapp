@@ -16,7 +16,7 @@ export const SelectLang: React.FC = () => {
 export const Question: React.FC = () => {
   return (
     <a
-      href="https://pro.ant.design/docs/getting-started"
+      href="https://applink.feishu.cn/client/chat/open?openId=ou_f3b7aff19f8ddfd32f682ed229759c32"
       target="_blank"
       rel="noreferrer"
       style={{

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Form, message } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useModel, history } from 'umi';
@@ -9,7 +9,18 @@ import styles from './index.less';
 const LoginPage = () => {
   const [form] = Form.useForm();
   const { initialState, setInitialState } = useModel('@@initialState');
-  const [setSubmitting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  // 新增：检查登录状态，已登录则跳转到首页
+  useEffect(() => {
+    if (initialState?.currentUser) {
+      // 如果有redirect参数则跳转到指定页面，否则跳首页
+      const { search } = window.location;
+      const urlParams = new URLSearchParams(search);
+      const redirect = urlParams.get('redirect');
+      history.push(redirect || '/');
+    }
+  }, [initialState?.currentUser, history]);
 
   // 飞书登录处理
   const handleFeishuLogin = () => {
