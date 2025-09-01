@@ -1,9 +1,9 @@
-import { LinkOutlined } from '@ant-design/icons';
+import { LinkOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import type { Settings as LayoutSettings } from '@ant-design/pro-components';
 import { SettingDrawer } from '@ant-design/pro-components';
 import type { RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { history, Link } from '@umijs/max';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   AvatarDropdown,
   AvatarName,
@@ -19,6 +19,22 @@ const isDev =
   process.env.NODE_ENV === 'development' || process.env.CI;
 const loginPath = '/user/login';
 
+// 读取 cookie 工具函数
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift() || null;
+  }
+  return null;
+};
+
+// 检查 session 是否为空
+const isSessionEmpty = () => {
+  const session = getCookie('session');
+  return !session || session.trim() === '';
+};
+
 /**
  * @see https://umijs.org/docs/api/runtime-config#getinitialstate
  * */
@@ -28,6 +44,14 @@ export async function getInitialState(): Promise<{
   loading?: boolean;
   fetchUserInfo?: () => Promise<API.CurrentUser | undefined>;
 }> {
+  // 检查 session 是否为空，为空则跳转到首页
+  if (isSessionEmpty() && history.location.pathname !== loginPath) {
+    history.replace(loginPath);
+    return {
+      settings: defaultSettings as Partial<LayoutSettings>,
+    };
+  }
+
   const fetchUserInfo = async () => {
     try {
       const msg = await queryCurrentUser({
@@ -39,6 +63,7 @@ export async function getInitialState(): Promise<{
     }
     return undefined;
   };
+
   // 如果不是登录页面，执行
   const { location } = history;
   if (
@@ -59,14 +84,47 @@ export async function getInitialState(): Promise<{
   };
 }
 
+// 全局点击事件处理
+const setupGlobalClickHandler = () => {
+  const handleGlobalClick = (e: MouseEvent) => {
+    // 排除首页和登录相关页面
+    const excludedPaths = ['/', loginPath, '/user/register', '/user/register-result'];
+    if (excludedPaths.includes(history.location.pathname)) return;
+
+    if (isSessionEmpty()) {
+      e.preventDefault();
+      e.stopPropagation();
+      // 跳转到首页
+      if (window.location.pathname !== '/') {
+        history.replace('/');
+      }
+    }
+  };
+
+  // 监听全局点击（捕获阶段）
+  document.addEventListener('click', handleGlobalClick, true);
+
+  // 返回清理函数
+  return () => {
+    document.removeEventListener('click', handleGlobalClick, true);
+  };
+};
+
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({
   initialState,
   setInitialState,
 }) => {
+  // 布局初始化时设置全局点击监听
+  useEffect(() => {
+    const cleanup = setupGlobalClickHandler();
+    return cleanup;
+  }, []);
+
   return {
     actionsRender: () => [
-      <Question key="doc" />
+      <Question key="doc" />,
+      <SelectLang key="SelectLang" />,
     ],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
@@ -81,7 +139,12 @@ export const layout: RunTimeLayoutConfig = ({
     footerRender: () => <Footer />,
     onPageChange: () => {
       const { location } = history;
-      // 如果没有登录，重定向到 login
+      // 页面切换时检查 session
+      if (isSessionEmpty() && !['/', loginPath].includes(location.pathname)) {
+        history.replace('/');
+        return;
+      }
+      // 原有登录检查逻辑
       if (!initialState?.currentUser && location.pathname !== loginPath) {
         history.push(loginPath);
       }

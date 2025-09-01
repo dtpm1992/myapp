@@ -1,8 +1,25 @@
 ﻿import type { RequestOptions } from '@@/plugin-request/request';
 import type { RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
+import { history } from '@umijs/max';
 
-// 错误处理方案： 错误类型
+// 读取 cookie 工具函数
+const getCookie = (name: string): string | null => {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) {
+    return parts.pop()?.split(';').shift() || null;
+  }
+  return null;
+};
+
+// 检查 session 是否为空
+const isSessionEmpty = () => {
+  const session = getCookie('session');
+  return !session || session.trim() === '';
+};
+
+// 错误处理方案：错误类型
 enum ErrorShowType {
   SILENT = 0,
   WARN_MESSAGE = 1,
@@ -10,6 +27,7 @@ enum ErrorShowType {
   NOTIFICATION = 3,
   REDIRECT = 9,
 }
+
 // 与后端约定的响应数据格式
 interface ResponseStructure {
   success: boolean;
@@ -40,8 +58,15 @@ export const errorConfig: RequestConfig = {
     },
     // 错误接收及处理
     errorHandler: (error: any, opts: any) => {
+      // 检查 session 是否为空，如果为空直接跳转首页
+      if (isSessionEmpty() && window.location.pathname !== '/') {
+        history.replace('/');
+        return;
+      }
+
       if (opts?.skipErrorHandler) throw error;
-      // 我们的 errorThrower 抛出的错误。
+      
+      // 我们的 errorThrower 抛出的错误
       if (error.name === 'BizError') {
         const errorInfo: ResponseStructure | undefined = error.info;
         if (errorInfo) {
@@ -63,23 +88,25 @@ export const errorConfig: RequestConfig = {
               });
               break;
             case ErrorShowType.REDIRECT:
-              // TODO: redirect
+              // 保留原有重定向逻辑
               break;
             default:
               message.error(errorMessage);
           }
         }
       } else if (error.response) {
-        // Axios 的错误
-        // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
+        // 401 未授权时自动跳转首页
+        if (error.response.status === 401) {
+          history.replace('/');
+          return;
+        }
+        // 其他状态码错误提示
         message.error(`Response status:${error.response.status}`);
       } else if (error.request) {
-        // 请求已经成功发起，但没有收到响应
-        // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
-        // 而在node.js中是 http.ClientRequest 的实例
+        // 请求已发出但无响应
         message.error('None response! Please retry.');
       } else {
-        // 发送请求时出了点问题
+        // 请求发送失败
         message.error('Request error, please retry.');
       }
     },
@@ -88,7 +115,7 @@ export const errorConfig: RequestConfig = {
   // 请求拦截器
   requestInterceptors: [
     (config: RequestOptions) => {
-      // 拦截请求配置，进行个性化处理。
+      // 拦截请求配置，添加通用处理
       const url = config?.url?.concat('?token=123');
       return { ...config, url };
     },
@@ -97,9 +124,14 @@ export const errorConfig: RequestConfig = {
   // 响应拦截器
   responseInterceptors: [
     (response) => {
+      // 先检查 session 是否为空
+      if (isSessionEmpty() && window.location.pathname !== '/') {
+        history.replace('/');
+        return response;
+      }
+
       // 拦截响应数据，进行个性化处理
       const { data } = response as unknown as ResponseStructure;
-
       if (data?.success === false) {
         message.error('请求失败！');
       }
