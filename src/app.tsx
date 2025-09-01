@@ -21,10 +21,13 @@ const loginPath = '/user/login';
 
 // 读取 cookie 工具函数
 const getCookie = (name: string): string | null => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) {
-    return parts.pop()?.split(';').shift() || null;
+  if (!document.cookie) return null;
+  const cookies = document.cookie.split(';').map(c => c.trim());
+  console.log(cookies)
+  for (const cookie of cookies) {
+    if (cookie.indexOf(`${name}=`) === 0) {
+      return cookie.substring(name.length + 1);
+    }
   }
   return null;
 };
@@ -32,6 +35,7 @@ const getCookie = (name: string): string | null => {
 // 检查 session 是否为空
 const isSessionEmpty = () => {
   const session = getCookie('session');
+  console.log('当前 session 值:', session, '是否为空:', !session || session.trim() === '');
   return !session || session.trim() === '';
 };
 
